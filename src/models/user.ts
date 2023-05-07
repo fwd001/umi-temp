@@ -1,26 +1,27 @@
 import { useSessionStorageState } from 'ahooks';
 import { useCallback } from 'react';
 
+const defaultValue = {
+  username: 'username',
+  isLogin: false,
+};
+
 export default function Model() {
-  const defaultValue = {
-    username: 'username',
-    isLogin: false,
-  };
   const [user, setUser] = useSessionStorageState('user-store', {
     defaultValue: defaultValue,
   });
   const login = useCallback(() => {
     setUser({
-      ...user,
+      ...user!,
       isLogin: true,
     });
   }, []);
   const logout = useCallback(() => {
     setUser({
-      ...user,
+      ...user!,
       isLogin: false,
     });
   }, []);
 
-  return { user: user, login, logout };
+  return { user, login, logout };
 }

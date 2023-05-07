@@ -10,5 +10,5 @@ npm start
 ```
 - 升级包
 ```sh
-pnpm up --latest
+pnpm up '!nprogress' '!typescript' --latest
 ```

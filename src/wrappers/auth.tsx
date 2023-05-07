@@ -2,7 +2,7 @@ import { Navigate, Outlet, useModel } from 'umi';
 
 export default () => {
   const { user } = useModel('user');
-  if (user.isLogin) {
+  if (user?.isLogin) {
     console.log('登录');
     return <Outlet />;
   } else {
