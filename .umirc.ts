@@ -1,4 +1,7 @@
+import CompressionPlugin from 'compression-webpack-plugin';
 import { defineConfig } from 'umi';
+
+const isProd = process.env.NODE_ENV === 'production';
 
 export default defineConfig({
   base: '/app/',
@@ -8,6 +11,7 @@ export default defineConfig({
     '@umijs/plugins/dist/react-query',
     '@umijs/plugins/dist/model',
   ],
+
   reactQuery: {
     devtool: false,
   },
@@ -58,8 +62,58 @@ export default defineConfig({
     { path: '/login', component: 'login', name: 'login', layout: false },
     { path: '/*', component: '404', layout: false },
   ],
+  proxy: {
+    '/server': {
+      target: 'http://118.178.181.105/',
+      changeOrigin: true,
+    },
+  },
+  metas: [
+    { 'http-equiv': 'pragram', content: 'no-cache' },
+    {
+      'http-equiv': 'cache-control',
+      content: 'no-cache, no-store, must-revalidate',
+    },
+    { 'http-equiv': 'expires', content: '0' },
+  ],
   npmClient: 'pnpm',
   targets: { chrome: 65 },
+  // 在生产环境中移除console
+  extraBabelPlugins: [isProd ? 'transform-remove-console' : ''],
+  // webpack配置
+  chainWebpack: function (config, { webpack }) {
+    config.merge({
+      // gzip压缩
+      optimization: {
+        splitChunks: {
+          chunks: 'all',
+          minSize: 1000,
+          minChunks: 2,
+          automaticNameDelimiter: '.',
+          cacheGroups: {
+            vendor: {
+              name: 'vendors',
+              test({ resource }: any) {
+                return /[\\/]node_modules[\\/]/.test(resource);
+              },
+              priority: 10,
+            },
+          },
+        },
+      },
+    });
+    //在生产环境开启gzip压缩
+    if (isProd) {
+      // Gzip压缩
+      config.plugin('compression-webpack-plugin').use(CompressionPlugin, [
+        {
+          test: /\.(js|css|html)$/i, // 匹配
+          threshold: 10240, // 超过10k的文件压缩
+          deleteOriginalAssets: false, // 不删除源文件
+        },
+      ] as any);
+    }
+  },
   // jsMinifier: 'terser',
   // cssMinifier: 'cssnano',
 });
