@@ -3,7 +3,6 @@ import dayjs from 'dayjs';
 import NP from 'number-precision';
 import Qs from 'qs';
 
-// 公用方法写这里
 // 获取url参数 @hashCheck 是否从hash中取值
 export const getQueryString = (name: string, hashCheck?: boolean) => {
   const reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)', 'i');
@@ -496,7 +495,7 @@ export function findCurNode(
   keyField: string,
   node = null,
 ) {
-  let _node = node
+  let _node = node;
   tree.forEach((item: any) => {
     if (item[keyField] === curKey) {
       _node = item;
@@ -509,4 +508,68 @@ export function findCurNode(
     }
   });
   return _node;
+}
+
+/**
+ * 返回一个字符串，表示开始日期和可选结束日期之间的持续时间，
+ * 格式为“小时小时分钟分钟”。
+ *
+ * @param {string} startDate - the start date in string format (e.g. "2022-01-01")
+ * @param {string} [endDate] - the optional end date in string format (defaults to current date)
+ * @return {string} the duration as a formatted string
+ */
+export function getDurtionStr(
+  startDate: string | Date,
+  endDate?: string | Date,
+) {
+  if (!startDate) return '0小时0分钟';
+  const now = endDate ? dayjs(endDate) : dayjs(); // 获取当前时间
+  const time = dayjs(startDate); // 指定一个时间
+  const diff = now.diff(time); // 计算两个时间之间相差的分钟数
+  const duration = dayjs.duration(diff);
+  const years = duration.years();
+  const months = duration.months();
+  const days = duration.days();
+  const hours = duration.hours();
+  const minutes = duration.minutes();
+  let timeStr = `${hours}小时 ${minutes}分钟`;
+
+  if (days > 0) {
+    timeStr = `${days}天${timeStr}`;
+  }
+  if (months > 0) {
+    timeStr = `${months}月${timeStr}`;
+  }
+  if (years > 0) {
+    timeStr = `${years}年${timeStr}`;
+  }
+  return timeStr;
+}
+
+export function formatAmount(amount: string) {
+  // 将金额转换为字符串
+  const amountStr = String(amount);
+
+  // 分割整数部分和小数部分（如果有）
+  const [integerPart, decimalPart = ''] = amountStr.split('.');
+
+  // 添加千位分隔符
+  let formattedAmount = '';
+  let count = 0;
+
+  for (let i = integerPart.length - 1; i >= 0; i--) {
+    formattedAmount = integerPart[i] + formattedAmount;
+    count++;
+
+    if (count % 3 === 0 && i !== 0) {
+      formattedAmount = ',' + formattedAmount;
+    }
+  }
+
+  // 如果有小数部分，则将其添加到结果中
+  if (decimalPart.length > 0) {
+    formattedAmount += '.' + decimalPart.substring(0, 2);
+  }
+
+  return formattedAmount;
 }

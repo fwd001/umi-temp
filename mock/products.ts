@@ -28,19 +28,19 @@ export default defineMock({
   'GET /api/products': (_, res) => {
     res.send({
       status: 'ok',
-      code: '0',
+      code: 200,
       data: products,
     });
   },
   'DELETE /api/products/:id': (req, res) => {
     products = products.filter((item) => item.id !== req.params.id);
-    res.send({ status: 'ok', code: '0', msg: '成功' });
+    res.send({ status: 'ok', code: 200, msg: '成功' });
   },
 
   'GET /api/infinite': (_, res) => {
     res.send({
       status: 'ok',
-      code: '0',
+      code: 200,
       data: getList(),
     });
   },

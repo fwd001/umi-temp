@@ -28,7 +28,7 @@ const transform: AxiosTransform = {
       formatDate,
       joinTime = true,
       isShowErrorMessage = true,
-    } = options;
+    } = options || {};
     const isUrlStr = isUrl(config.url as string);
 
     config.isShowErrorMessage = isShowErrorMessage;
@@ -42,7 +42,11 @@ const transform: AxiosTransform = {
     }
     const params = config.params || {};
     const data = config.data || false;
-    if (config.method?.toUpperCase() === RequestEnum.GET) {
+    if (
+      [RequestEnum.GET, RequestEnum.DELETE].includes(
+        config.method?.toUpperCase() as any,
+      )
+    ) {
       if (!isString(params)) {
         // 给 get 请求加上时间戳参数，避免从缓存中拿数据。
         config.params = Object.assign(
@@ -111,8 +115,8 @@ class Request {
     this.instance.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
         // 一般会请求拦截里面加token
-        const token = sessionStorage.getItem('token') || '';
-        config.headers!.Authorization = token;
+        const token = localStorage.getItem('user-token') || '';
+        config.headers.Authorization = token.replaceAll('"', '');
         return config;
       },
       (err: any) => {
@@ -122,19 +126,17 @@ class Request {
 
     this.instance.interceptors.response.use(
       (response: AxiosResponse) => {
-        const { code = '0', msg = '服务发生错误！' } = response.data;
+        const { code = 200, message: msg = '服务发生错误！' } = response.data;
+
         // token 失效
-        if (code === 'AU0000') {
-          // if (import.meta.env.DEV) {
-          //   const store = useUserStore()
-          //   store.logout()
-          //   throw response.data
-          // }
-          // location.href = import.meta.env.VITE_AUTHORIZE_HREF
+        if (Number(code) === 403) {
+          message.error(msg);
+          localStorage.removeItem('user-token');
+          throw response.data;
         }
         // 业务错误处理
-        if (code !== '0') {
-          if (response.config.isShowErrorMessage) {
+        if (Number(code) !== 200) {
+          if ([undefined, true].includes(response.config.isShowErrorMessage)) {
             message.error(msg);
           }
           throw response.data;
@@ -161,7 +163,6 @@ class Request {
             throw response;
           }
         }
-
         // 直接返回res，当然你也可以只返回res.data
         return response.data;
       },

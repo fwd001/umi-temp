@@ -2,7 +2,7 @@ import { Layout, theme } from 'antd';
 import { Outlet } from 'umi';
 import Header from './header';
 import './index.less';
-import Navigation from './navigation';
+import Navigation from './sider';
 
 const { Content } = Layout;
 

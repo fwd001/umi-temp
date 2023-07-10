@@ -11,7 +11,7 @@ export default defineConfig({
     '@umijs/plugins/dist/react-query',
     '@umijs/plugins/dist/model',
   ],
-
+  hash: true,
   reactQuery: {
     devtool: false,
   },
@@ -64,7 +64,7 @@ export default defineConfig({
   ],
   proxy: {
     '/server': {
-      target: 'http://118.178.181.105/',
+      target: 'http://118.178.181.105',
       changeOrigin: true,
     },
   },
